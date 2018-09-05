@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name     Twitter Lists Sidebar
+// @name        Twitter Lists Sidebar
 // @description Show your Twitter Lists in sidebar
-// @version  0.2
-// @grant    GM.xmlHttpRequest
-// @include  https://twitter.com/*
+// @version     0.3
+// @grant       GM.xmlHttpRequest
+// @include     https://twitter.com/*
 // ==/UserScript==
 
 // Note: Avoid using jQuery as it may not be avialble on page load yet
@@ -119,6 +119,8 @@
     }
     sidebar = document.createElement('sidebar');
     sidebar.id = 'lists-sidebar';
+    // Reuse existing style for consistent color and backgroud-color
+    sidebar.className = 'DashboardProfileCard'
 
     let title = document.createElement('h3');
     title.innerHTML = 'Lists';
@@ -131,7 +133,7 @@
     for (let i = 0; i < lists.length; i++) {
       let li = document.createElement('li');
       let a = document.createElement('a');
-      a.className = 'js-nav';
+      a.className = 'js-nav u-textUserColor';
       a.href = lists[i].url;
       a.innerHTML = lists[i].name;
       li.appendChild(a);
@@ -155,7 +157,6 @@
         top: 30%;
         padding: 1em 1.5em;
         line-height: 1.5;
-        background-color: #fff;
         z-index: 1000000;
       }
 
@@ -169,10 +170,6 @@
         padding: 0;
         list-style-type: disc;
         list-style-position: inside;
-      }
-
-      #lists-sidebar ul li.active {
-        background-color: #ddd;
       }
     `;
     document.head.appendChild(style);
