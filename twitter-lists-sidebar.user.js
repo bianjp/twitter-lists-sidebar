@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name     Twitter Lists Sidebar
 // @description Show your Twitter Lists in sidebar
-// @version  0.1
-// @grant    none
+// @version  0.2
+// @grant    GM.xmlHttpRequest
 // @include  https://twitter.com/*
 // ==/UserScript==
 
@@ -61,22 +61,30 @@
   }, 300);
 
   function ajaxRequest(url, callback) {
-    let request = new XMLHttpRequest();
-    request.open('GET', url, true);
-
-    request.onload = function() {
-      if (request.status >= 200 && request.status < 400) {
-        callback(request.responseText);
-      } else {
+    // "Referer" header is required for the request to succeed,
+    // but native XMLHttpRequest does not alllow to set this header
+    // https://wiki.greasespot.net/GM.xmlHttpRequest
+    GM.xmlHttpRequest({
+      method: 'GET',
+      url: url,
+      timeout: 3000,
+      headers: {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Referer': 'https://twitter.com/',
+        'X-Push-State-Request': 'true',
+        'X-Twitter-Active-User': 'yes',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      onload: function(details) {
+        callback(JSON.parse(details.responseText).page.replace(/\\n|\\/g, ''));
+      },
+      onerror: function() {
+        callback(null);
+      },
+      ontimeout: function() {
         callback(null);
       }
-    };
-
-    request.onerror = function() {
-      callback(null);
-    };
-
-    request.send();
+    });
   }
 
   // Retrive lists by requesting lists page and parsing returned HTML
@@ -91,7 +99,6 @@
         let lists = [];
         let match = null;
         while (match = pattern.exec(html)) {
-
           lists.push({
             url: match[1],
             name: match[2],
